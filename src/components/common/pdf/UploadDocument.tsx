@@ -21,11 +21,15 @@ const UploadExam: React.FC = () => {
       const formData = new FormData();
       formData.append("document", selectedFile);
 
-      await axios.post("/api/upload-exam-document/", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      await axios.post(
+        "http://127.0.0.1:8000/api/upload-exam-document/",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         },
-      });
+      );
 
       // Optionally, you can handle success here, e.g., show a success message
       console.log("Exam document uploaded successfully");

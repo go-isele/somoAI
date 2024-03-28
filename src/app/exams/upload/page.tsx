@@ -9,8 +9,6 @@ export const metadata: Metadata = {
 };
 
 const TakeExamComponent = () => {
-  const pdfUrl = "/documents/create-course.pdf"; // URL of your PDF file
-
   return (
     <DefaultLayout>
       <div>

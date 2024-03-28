@@ -1,116 +1,125 @@
 "use client";
-import { useState, useRef, ChangeEvent } from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+import { useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/esm/Page/AnnotationLayer.css"; // Blocks blank TextLayers.
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.js",
-  import.meta.url,
-).toString();
+pdfjs.GlobalWorkerOptions.workerSrc = `/pdf.worker.js`;
 
-type Annotation = {
-  page: number;
-  text: string;
-};
+export default function PDFViewer(props: any) {
+  const [numPages, setNumPages] = useState<number>(0);
+  const [pageNumber, setPageNumber] = useState<number>(1); // start on first page
+  const [loading, setLoading] = useState(true);
+  const [pageWidth, setPageWidth] = useState(0);
 
-type PDFViewer2Props = {
-  pdfPath: string;
-};
-
-const PDFViewer2: React.FC<PDFViewer2Props> = ({ pdfPath }) => {
-  const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState<number>(1);
-  const [scale, setScale] = useState<number>(1);
-  const [annotations, setAnnotations] = useState<Annotation[]>([]);
-  const [annotationText, setAnnotationText] = useState<string>("");
-  const annotationInputRef = useRef<HTMLInputElement>(null);
-
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-    setNumPages(numPages);
+  function onDocumentLoadSuccess({
+    numPages: nextNumPages,
+  }: {
+    numPages: number;
+  }) {
+    setNumPages(nextNumPages);
   }
 
-  const handleAnnotationChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setAnnotationText(e.target.value);
+  function onPageLoadSuccess() {
+    setPageWidth(window.innerWidth);
+    setLoading(false);
+  }
+
+  const options = {
+    cMapUrl: "cmaps/",
+    cMapPacked: true,
+    standardFontDataUrl: "standard_fonts/",
   };
 
-  const addAnnotation = () => {
-    if (!annotationText.trim()) return;
-    setAnnotations([
-      ...annotations,
-      { page: pageNumber, text: annotationText },
-    ]);
-    setAnnotationText("");
-    if (annotationInputRef.current) {
-      annotationInputRef.current.value = "";
-    }
-  };
+  // Go to next page
+  function goToNextPage() {
+    setPageNumber((prevPageNumber) => prevPageNumber + 1);
+  }
+
+  function goToPreviousPage() {
+    setPageNumber((prevPageNumber) => prevPageNumber - 1);
+  }
 
   return (
-    <div className="mx-auto w-full max-w-screen-lg p-4">
-      <div className="mb-4 flex justify-center space-x-4">
-        <button
-          onClick={() => setPageNumber((prevPage) => Math.max(1, prevPage - 1))}
-          className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+    <>
+      <Nav pageNumber={pageNumber} numPages={numPages} />
+      <div
+        hidden={loading}
+        style={{ height: "calc(100vh - 64px)" }}
+        className="flex items-center"
+      >
+        <div
+          className={`absolute z-10 flex w-full items-center justify-between px-2`}
         >
-          Previous Page
-        </button>
-        <button
-          onClick={() =>
-            setPageNumber((prevPage) => Math.min(numPages || 1, prevPage + 1))
-          }
-          className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-        >
-          Next Page
-        </button>
-        <button
-          onClick={() => setScale((prevScale) => Math.min(2, prevScale + 0.1))}
-          className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
-        >
-          Zoom In
-        </button>
-        <button
-          onClick={() =>
-            setScale((prevScale) => Math.max(0.5, prevScale - 0.1))
-          }
-          className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
-        >
-          Zoom Out
-        </button>
-      </div>
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Add annotation..."
-          onChange={handleAnnotationChange}
-          ref={annotationInputRef}
-          className="w-2/3 rounded border px-4 py-2 focus:outline-none"
-        />
-        <button
-          onClick={addAnnotation}
-          className="rounded bg-indigo-500 px-4 py-2 text-white hover:bg-indigo-600"
-        >
-          Add Annotation
-        </button>
-      </div>
-      <Document file={pdfPath} onLoadSuccess={onDocumentLoadSuccess}>
-        <Page pageNumber={pageNumber} width={600 * scale} />
-        {annotations.map((annotation, index) =>
-          annotation.page === pageNumber ? (
-            <div
-              key={index}
-              style={{
-                position: "absolute",
-                top: 100,
-                left: 100,
-                background: "yellow",
-              }}
-            >
-              {annotation.text}
-            </div>
-          ) : null,
-        )}
-      </Document>
-    </div>
-  );
-};
+          <button
+            onClick={goToPreviousPage}
+            disabled={pageNumber <= 1}
+            className="h-[calc(100vh - 64px)] text-gray-400 hover:text-gray-50 relative px-2 py-24 focus:z-20"
+          >
+            <span className="sr-only">Previous</span>
+            <ChevronLeftIcon className="h-10 w-10" aria-hidden="true" />
+          </button>
+          <button
+            onClick={goToNextPage}
+            disabled={pageNumber >= numPages!}
+            className="h-[calc(100vh - 64px)] text-gray-400 hover:text-gray-50 relative px-2 py-24 focus:z-20"
+          >
+            <span className="sr-only">Next</span>
+            <ChevronRightIcon className="h-10 w-10" aria-hidden="true" />
+          </button>
+        </div>
 
-export default PDFViewer2;
+        <div className="mx-auto flex h-full justify-center">
+          <Document
+            file={props.file}
+            onLoadSuccess={onDocumentLoadSuccess}
+            options={options}
+            renderMode="canvas"
+            className=""
+          >
+            <Page
+              className=""
+              key={pageNumber}
+              pageNumber={pageNumber}
+              renderAnnotationLayer={false}
+              renderTextLayer={false}
+              onLoadSuccess={onPageLoadSuccess}
+              onRenderError={() => setLoading(false)}
+              width={Math.max(pageWidth * 0.8, 390)}
+            />
+          </Document>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function Nav({
+  pageNumber,
+  numPages,
+}: {
+  pageNumber: number;
+  numPages: number;
+}) {
+  return (
+    <nav className="bg-black">
+      <div className="mx-auto px-2 sm:px-6 lg:px-8">
+        <div className="relative flex h-16 items-center justify-between">
+          <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+            <div className="flex flex-shrink-0 items-center">
+              <p className="text-2xl font-bold tracking-tighter text-white">
+                somoAI
+              </p>
+            </div>
+          </div>
+          <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+            <div className="bg-gray-900 rounded-md px-3 py-2 text-sm font-medium text-white">
+              <span>{pageNumber}</span>
+              <span className="text-gray-400"> / {numPages}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+}

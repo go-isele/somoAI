@@ -187,6 +187,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-6">
                           <li>
                             <Link
+                              href="/exams/take"
+                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                                pathname === "/exams/take" && "text-white"
+                              } `}
+                            >
+                              Take Exam
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
                               href="/"
                               className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/" && "text-white"
@@ -222,8 +232,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   );
                 }}
               </SidebarLinkGroup>
-              {/* <!-- Menu Item Dashboard --> */}
-
+              ;{/* <!-- Menu Item Dashboard --> */}
               {/* <!-- Menu Item Forms --> */}
               <SidebarLinkGroup
                 activeCondition={
@@ -315,6 +324,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <Link
+                              href="/exams/upload"
+                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                                pathname === "/exams/upload" && "text-white"
+                              }`}
+                            >
+                              Upload Exam
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
                               href="/exams/upload-marking-scheme"
                               className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
                                 pathname === "/exams/upload-marking-scheme" &&
@@ -354,7 +373,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   );
                 }}
               </SidebarLinkGroup>
-              {/* <!-- Menu Item Profile --> */}
+              ;{/* <!-- Menu Item Profile --> */}
               <li>
                 <Link
                   href="/profile"
@@ -383,7 +402,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 </Link>
               </li>
               {/* <!-- Menu Item Profile --> */}
-
               {/* <!-- Menu Item Settings --> */}
               <li>
                 <Link
